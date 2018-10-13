@@ -1,0 +1,9 @@
+int   s , t ;
+real  r , pi ;
+printi 2 + 3 * 4 ;
+s = 2 + 3 ;
+t = 7 if s < 4 else 5 ;
+printi s * t ^ 2 ;
+printi ( s + t ) * ( s - t ) ;
+r = 8.0 ; pi = 3.1416 ;
+printr 2.0 * pi * r
