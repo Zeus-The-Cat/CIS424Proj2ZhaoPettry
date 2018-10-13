@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+#CIS424 Project 2
+#Yiyuan Zhao
+#Dakotah Pettry
+
 #imported to allow for terminal input through sys.argv[1]
 
 import sys
@@ -10,6 +14,14 @@ def lexan():
         return(next(mitr))
     except StopIteration:
         return('')
+    
+def match(ch):
+    global lookahead
+    if ch == lookahead:
+        lookahead = lexan() #matches, gives next lexeme/token
+    else: 
+        print("Syntax error.")
+        exit()
 
 #each grammar object will have its own method
 #two main "parent types" -> <decl-list> <stmt-list>
@@ -49,10 +61,10 @@ def type():
 
 def id_list():
     global lookahead
-    #***check that id hasn't been declared yet in dictionary***
+    #***check that id hasn't been declared yet in dictionary (type and id_list as key and value?)***
     #***if not add to dictionary else Syntax error exit********
     #if id not in dict:
-    #    dict.update({key:value}) ***key could be 'x' or 'f', value could be 0 or 0.0
+    #    dict.update({type:id_list}) e.g., key could be 'x' or 'f', value could be 0 or 0.0
     #else:
     #    print("Syntax error")
     #    exit
@@ -97,19 +109,25 @@ def stmt():
     else:
         print("Syntax Error AT STMT-;")
 
-def expr():
+def expr(): #using variable v, from example in notes
     global lookahead
-    term()
-    if lookahead == "+":
-        print("FOUND +")
-        lookahead = lexan()
-        term()
-    elif lookahead == "-":
-        print("FOUND -")
-        lookahead = lexan()
-        term()
-    else: 
-        print("Synax Error at EXPR")
+    v = term()
+    while (true):
+        if lookahead == "+":
+            print("FOUND +")
+            match('+')
+            v += term()
+            #lookahead = lexan()
+            #term()
+        elif lookahead == "-":
+            print("FOUND -")
+            match('-')
+            v -= term()
+            #lookahead = lexan()
+            #term()
+        else: 
+            print("Syntax Error at EXPR")
+            return v
 
 def term():
     global lookahead
@@ -127,21 +145,24 @@ def term():
 
 def factor():
     global lookahead
-    base()
+    v = base()
     if lookahead == "^":
         print("FOUND ^")
         lookahead = lexan()
-        base() ** factor()
+        v = v ** factor() #<factor> ::= <base> ^ <factor>
 
 def base():
     global lookahead
     if lookahead == "(":
+        match('(')
         lookahead = lexan()
         expr()
+        match(')')
         #not sure if I need to include ")" part of " ( <expr> )
     elif(true): #if id in dict
         print(lookahead)
-        lookahead = lexan()
+        lookahead = lexan() 
+        #insert id into symbol table with the type t
     elif(true): #if intnum...???
         print(lookahead)
         lookahead = lexan()
@@ -179,7 +200,7 @@ def cond():
 
 def oprnd():
     global lookahead
-    #***check that id hasn't been declared yet in dictionary***
+    #***check that id hasn't been declared yet in dictionary (type and id_list as key and value?)***
     #***if not add to dictionary else Syntax error exit********
     #if id not in dict:
     #    dict.update({key:value}) ***key could be 'x' or 'f', value could be 0 or 0.
