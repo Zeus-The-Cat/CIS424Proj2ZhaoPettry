@@ -131,17 +131,22 @@ def expr(): #using variable v, from example in notes
 
 def term():
     global lookahead
-    factor()
-    if lookahead == "*":
-        print("FOUND *")
-        lookahead = lexan()
-        factor()
-    elif lookahead == "/":
-        print("FOUND /")
-        lookahead = lexan()
-        factor()
-    else:
-        print("Syntax Error at TERM")
+    v = factor()
+    while (true):
+        if lookahead == "*":
+            print("FOUND *")
+            match("*")
+            v *= factor()
+            #lookahead = lexan()
+            #factor()
+        elif lookahead == "/":
+            print("FOUND /")
+            match("/")
+            v /= factor()
+            #lookahead = lexan()
+            #factor()
+        else:
+            print("Syntax Error at TERM")
 
 def factor():
     global lookahead
