@@ -200,8 +200,7 @@ def cond():
 
 def oprnd():
     global lookahead
-    #***check that id hasn't been declared yet in dictionary (type and id_list as key and value?)***
-    #***if not add to dictionary else Syntax error exit********
+    #TO DO -------------------------------------------------
     #if id not in dict:
     #    dict.update({key:value}) ***key could be 'x' or 'f', value could be 0 or 0.
     #elif intnum:
@@ -215,13 +214,19 @@ def oprnd():
 
 #main Method
 file = open(sys.argv[1],"r")
-
 wlist = file.read().split()
-
 mitr = iter(wlist)
-
 lookahead = lexan()
 
+#not sure if two dictionaries are needed
+#typeDict = {}
+#id_listDict = {}
+
+#OR if the one dictionary is: typeIdDict = {} with type as key, idList as value?
+listTest = []
+for w in wlist:
+    listTest.append(w)
+    
 prog()
 
 if lookahead == "":
