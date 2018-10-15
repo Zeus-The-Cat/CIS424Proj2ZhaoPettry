@@ -14,15 +14,52 @@ def lexan():
         return(next(mitr))
     except StopIteration:
         return('')
-    
+
 def match(ch):
     global lookahead
     if ch == lookahead:
         lookahead = lexan() #matches, gives next lexeme/token
-    else: 
-        print("Syntax error.")
-        exit()
+        return 1
+    else:
+        return 0
 
+#Checks if ID via lookahead is in dict already or if it's a forbidden NAME
+#if not places the ID In dict with value of NONE
+def newID():
+    global lookahead
+    global dict
+    badNames = ["printi","printr","int","real"]
+    if lookahead in dict.keys():
+        #ID already in dict
+        print("Syntax Error: ID ALREADY IN DICT")
+        exit(1)
+        return 0
+    elif lookahead in badNames:
+        #Forbidden Name
+        print("Syntax Error: FORBIDDEN ID NAME")
+        exit(1)
+        return 0
+    else:
+        #Success
+        dict[lookahead] = None
+        #print(dict)
+        return 1
+
+#checks if string is real number
+def is_real(tempString):
+    try:
+        float(tempString)
+        return True
+    except ValueError:
+        return False
+
+#checks if string is int number
+def is_int(tempString):
+    try:
+        int(tempString)
+        return True
+    except ValueError:
+        return False
 #each grammar object will have its own method
 #two main "parent types" -> <decl-list> <stmt-list>
 def prog():
@@ -44,177 +81,199 @@ def decl():
     global lookahead
     type()
     id_list()
-    if lookahead == ";":
-        print("FOUND ;")
-        lookahead = lexan()
-    else:
+    if not match(";"):
         print("Error at DECL")
-        print(lookahead)
+        #print(lookahead)
 
 def type():
     global lookahead
-    if lookahead == "int":
-        print("FOUND int")
+    typeList = ["int","real"]
+    if lookahead in typeList:
+        #print("FOUND int/real")
+        lookahead = lexan()
     else:
-        print("FOUND real")
-    lookahead = lexan()
+        print("Syntax Error: not int or real")
+        exit(1)
 
 def id_list():
     global lookahead
     #***check that id hasn't been declared yet in dictionary (type and id_list as key and value?)***
     #***if not add to dictionary else Syntax error exit********
-    #if id not in dict:
-    #    dict.update({type:id_list}) e.g., key could be 'x' or 'f', value could be 0 or 0.0
-    #else:
-    #    print("Syntax error")
-    #    exit
-    
-    #DELETE WHEN FINISHED WITH ^^ ---------TO-DO--------
-    print(lookahead)
-    lookahead = lexan()
-    if lookahead == ",":
-        print("FOUND ,")
-        lookahead = lexan()
+    if newID():
+       #worked
+       lookahead = lexan()
+    else:
+       print("Syntax Errors")
+       exit(1)
+
+    if match(","):
+        #print("FOUND ,")
         id_list()
 
 
 #stmt-list#---------------------------
 def stmt_list():
     global lookahead
+    global dict
     #do while input equals (a declared id, printi, printr)
     stmt()
-    while((lookahead == id) or (lookahead == "printi" or lookahead == "printr")):
+    while((lookahead in dict.keys()) or (lookahead == "printi") or (lookahead == "printr")):
+        #print(dict)
         stmt()
 
 def stmt():
     global lookahead
-
-    if(true): #if id in dict
+    global dict
+    global finalPrint
+    if(lookahead in dict.keys()): #if id in dict
+        id = lookahead
+        idVal = 0.0
         lookahead = lexan()
-        if(lookahead == "="):
-            lookahead = lexan()
-            expr()
+        if(match("=")):
+            idVal = expr()
+            if(match(";")):
+                dict[id] = idVal
+            elif(match("if")):
+                if(cond()):
+                    dict[id] = idVal
+                elif(match("else")):
+                    dict[id] = expr()
+                    if(not(match(";"))):
+                        print("Syntax Error: missing ;")
+                        exit(1)
+                else:
+                    print("Syntax Error: missing else statements")
+                    exit(1)
         else:
-            print("Syntax Error AT =")
-    elif(true): #if printi in dict
-        expr()
-    elif(true): #if printr in dict
-        expr()
-        
+            print("Syntax Error AT = ")
+            exit(1)
+    elif(match("printi")): #if printi in dict
+        temp1 = expr()
+        if(not(match(";"))):
+            print("Syntax Error: missing ;")
+            exit(1)
+        else:
+            finalPrint.append(int(temp1));
+    elif(match("printr")): #if printr in dict
+        temp2 = expr()
+        if(not(match(";"))):
+            print("Syntax Error: missing ;")
+            exit(1)
+        else:
+            finalPrint.append(float(temp2))
     else:
-        print("Syntax Error AT STMT")
-
-    if(lookahead == ";"):
-        lookahead = lexan()
-    else:
-        print("Syntax Error AT STMT-;")
+        print("Syntax Errors")
+        exit(1)
 
 def expr(): #using variable v, from example in notes
     global lookahead
     v = term()
-    while (true):
-        if lookahead == "+":
-            print("FOUND +")
-            match('+')
+    tempList = ["+","-"]
+    while (lookahead in tempList):
+        if match("+"):
+            #print("FOUND +")
             v += term()
-            #lookahead = lexan()
-            #term()
-        elif lookahead == "-":
-            print("FOUND -")
-            match('-')
+        elif match("-"):
+            #print("FOUND -")
             v -= term()
-            #lookahead = lexan()
-            #term()
-        else: 
-            print("Syntax Error at EXPR")
-            return v
+        else:
+            print("Syntax Errors")
+            exit(1)
+    return v
 
 def term():
     global lookahead
     v = factor()
-    while (true):
-        if lookahead == "*":
-            print("FOUND *")
-            match("*")
+    mdlist = ["*","/"]
+    while (lookahead in mdlist):
+        if match("*"):
+            #print("FOUND *")
             v *= factor()
-            #lookahead = lexan()
-            #factor()
-        elif lookahead == "/":
-            print("FOUND /")
-            match("/")
+        elif match("/"):
+            #print("FOUND /")
             v /= factor()
-            #lookahead = lexan()
-            #factor()
         else:
             print("Syntax Error at TERM")
+            exit(1)
+    return v
 
 def factor():
     global lookahead
     v = base()
-    if lookahead == "^":
-        print("FOUND ^")
-        lookahead = lexan()
+    if match("^"):
+        #print("FOUND ^ ")
         v = v ** factor() #<factor> ::= <base> ^ <factor>
+    return v
 
 def base():
     global lookahead
-    if lookahead == "(":
-        match('(')
+    global dict
+    if match("("): #::= ( <expr> )
+        v = expr()
+        if(not(match(')'))):
+            print("Syntax Error: missing ) bracket")
+            exit(1)
+        return v
+    elif(lookahead in dict.keys()): #if id in dict
+        #print(lookahead)
+        v = dict[lookahead]
         lookahead = lexan()
-        expr()
-        match(')')
-        #not sure if I need to include ")" part of " ( <expr> )
-    elif(true): #if id in dict
-        print(lookahead)
-        lookahead = lexan() 
-        #insert id into symbol table with the type t
-    elif(true): #if intnum...???
-        print(lookahead)
+        return v
+    elif(is_real(lookahead)): #if realnum
+        # print(lookahead)
+        v = float(lookahead)
         lookahead = lexan()
-    elif(true): #if realnum...???
-        print(lookahead)
+        return v
+    elif(is_int(lookahead)): #if intnum
+        #print(lookahead)
+        v = int(lookahead)
         lookahead = lexan()
-        
+        return v
     else:
         print("Syntax error at BASE")
+        exit(1)
+        #print(lookahead)
 
 def cond():
     global lookahead
-    oprnd()
-    if lookahead == "<": #<cond> ::= <oprnd> < <oprnd> |
-        lookahead = lexan()
-        oprnd()
-    elif lookahead == "<=": #<oprnd> <= <oprnd> |
-        lookahead = lexan()
-        oprnd()
-    elif lookahead == ">": #<oprnd> > <oprnd> |
-        lookahead = lexan()
-        oprnd()
-    elif lookahead == ">=": #<oprnd> >= <oprnd> |
-        lookahead = lexan()
-        oprnd()
-    elif lookahead == "==": #<oprnd> == <oprnd> |
-        lookahead = lexan()
-        oprnd()
-    elif lookahead == "!=": #<oprnd> != <oprnd>
-        lookahead = lexan()
-        oprnd()
-        
-    else: 
+    prt1 = oprnd()
+    if match("<"): #<cond> ::= <oprnd> < <oprnd> |
+        prt2 = oprnd()
+        return prt1 < prt2
+    elif match("<="): #<oprnd> <= <oprnd> |
+        prt2 = oprnd()
+        return prt1 <= prt2
+    elif match(">"): #<oprnd> > <oprnd> |
+        prt2 = oprnd()
+        return prt1 > prt2
+    elif match(">="): #<oprnd> >= <oprnd> |
+        prt2 = oprnd()
+        return prt1 >= prt2
+    elif match("=="): #<oprnd> == <oprnd> |
+        prt2 = oprnd()
+        return prt1 == prt2
+    elif match("!="): #<oprnd> != <oprnd>
+        prt2 = oprnd()
+        return prt1 != prt2
+    else:
         print("Syntax Error at COND")
+        exit(1)
 
 def oprnd():
     global lookahead
+    global dict
     #TO DO -------------------------------------------------
-    #if id not in dict:
-    #    dict.update({key:value}) ***key could be 'x' or 'f', value could be 0 or 0.
-    #elif intnum:
-    #    print something?
-    #elif realnum:
-    #    print something?
-    #else:
-    #    print("Syntax error")
-    #    exit
+    if(lookahead in dict.keys()):
+        temp = dict[lookahead]
+        lookahead = lexan()
+        return temp
+    elif(is_real(lookahead)):
+        temp = float(lookahead)
+        lookahead = lexan()
+        return temp
+    else:
+        print("Syntax Error: OPRND")
+        exit(1)
 
 
 #main Method
@@ -222,19 +281,12 @@ file = open(sys.argv[1],"r")
 wlist = file.read().split()
 mitr = iter(wlist)
 lookahead = lexan()
-
-#not sure if two dictionaries are needed
-#typeDict = {}
-#id_listDict = {}
-
-#OR if the one dictionary is: typeIdDict = {} with type as key, idList as value?
-listTest = []
-for w in wlist:
-    listTest.append(w)
-    
+#master dictionary containing variables
+dict = {}
+finalPrint = []
 prog()
-
 if lookahead == "":
-    print("Passed")
+    for line in finalPrint:
+        print(line)
 else:
     print("Syntax Error")
