@@ -4,7 +4,6 @@
 #Dakotah Pettry
 
 #imported to allow for terminal input through sys.argv[1]
-
 import sys
 
 #lexan uses mitr to iterate the parsed input file until there is nothing left
@@ -262,7 +261,6 @@ def cond():
 def oprnd():
     global lookahead
     global dict
-    #TO DO -------------------------------------------------
     if(lookahead in dict.keys()):
         temp = dict[lookahead]
         lookahead = lexan()
