@@ -4,7 +4,6 @@
 #Dakotah Pettry
 
 #imported to allow for terminal input through sys.argv[1]
-
 import sys
 
 #lexan uses mitr to iterate the parsed input file until there is nothing left
@@ -32,7 +31,7 @@ def prog():
     #stmt_list
     stmt_list()
 
-#decl-list#-----------------------------
+#decl-list#--------------------------------
 def decl_list():
     global lookahead
     #do while loop
@@ -55,7 +54,7 @@ def type():
     global lookahead
     if lookahead == "int":
         print("FOUND int")
-    else:
+    elif lookahead == "real":
         print("FOUND real")
     lookahead = lexan()
 
@@ -63,13 +62,12 @@ def id_list():
     global lookahead
     #***check that id hasn't been declared yet in dictionary (type and id_list as key and value?)***
     #***if not add to dictionary else Syntax error exit********
-    #if id not in dict:
-    #    dict.update({type:id_list}) e.g., key could be 'x' or 'f', value could be 0 or 0.0
-    #else:
-    #    print("Syntax error")
-    #    exit
-    
-    #DELETE WHEN FINISHED WITH ^^ ---------TO-DO--------
+    if id not in typeIdDict:
+        typeIdDict.update({id:0})
+    else:
+        print("Syntax error")
+        exit
+
     print(lookahead)
     lookahead = lexan()
     if lookahead == ",":
@@ -78,7 +76,7 @@ def id_list():
         id_list()
 
 
-#stmt-list#---------------------------
+#stmt-list#------------------------------
 def stmt_list():
     global lookahead
     #do while input equals (a declared id, printi, printr)
@@ -89,16 +87,16 @@ def stmt_list():
 def stmt():
     global lookahead
 
-    if(true): #if id in dict
+    if(id in typeIdDict): #if id in dict
         lookahead = lexan()
         if(lookahead == "="):
             lookahead = lexan()
             expr()
         else:
             print("Syntax Error AT =")
-    elif(true): #if printi in dict
+    elif("printi" in typeIdDict): #if printi in dict
         expr()
-    elif(true): #if printr in dict
+    elif("printr" in typeIdDict): #if printr in dict
         expr()
         
     else:
@@ -112,7 +110,9 @@ def stmt():
 def expr(): #using variable v, from example in notes
     global lookahead
     v = term()
-    while (true):
+    while ((lookahead == "+") or (lookahead == "-")): 
+    #need a third 'or' statement, for when lookahead == <term> 
+    #but idk how to word that
         if lookahead == "+":
             print("FOUND +")
             match('+')
@@ -132,7 +132,8 @@ def expr(): #using variable v, from example in notes
 def term():
     global lookahead
     v = factor()
-    while (true):
+    while ((lookahead == "*") or (lookahead == "/")):
+    #need a lookahead == <factor> in while loop
         if lookahead == "*":
             print("FOUND *")
             match("*")
@@ -147,6 +148,7 @@ def term():
             #factor()
         else:
             print("Syntax Error at TERM")
+            return v
 
 def factor():
     global lookahead
@@ -164,14 +166,14 @@ def base():
         expr()
         match(')')
         #not sure if I need to include ")" part of " ( <expr> )
-    elif(true): #if id in dict
+    elif(id in typeIdDict): #if id in dict
         print(lookahead)
         lookahead = lexan() 
         #insert id into symbol table with the type t
-    elif(true): #if intnum...???
+    elif("intnum" in typeIdDict): #if intnum...???
         print(lookahead)
         lookahead = lexan()
-    elif(true): #if realnum...???
+    elif("realnum" in typeIdDict): #if realnum...???
         print(lookahead)
         lookahead = lexan()
         
@@ -205,32 +207,33 @@ def cond():
 
 def oprnd():
     global lookahead
-    #TO DO -------------------------------------------------
-    #if id not in dict:
-    #    dict.update({key:value}) ***key could be 'x' or 'f', value could be 0 or 0.
-    #elif intnum:
-    #    print something?
-    #elif realnum:
-    #    print something?
-    #else:
-    #    print("Syntax error")
-    #    exit
+    if id not in typeIdDict:
+        typeIdDict.update({id:0})
+    elif "intnum" in typeIdDict:
+        print("Integer Number")
+    elif "realnum" in typeIdDict:
+        print("Real Number")
+        exit
 
-
-#main Method
-file = open(sys.argv[1],"r")
+#main method
+#file = open(sys.argv[1],"r")
+file = open("test.txt","r")
 wlist = file.read().split()
 mitr = iter(wlist)
 lookahead = lexan()
 
-#not sure if two dictionaries are needed
+#not sure if two dictionaries are needed to implement symbol table
+#dictionary for storing variables & for looking them up
 #typeDict = {}
 #id_listDict = {}
 
-#OR if the one dictionary is: typeIdDict = {} with type as key, idList as value?
+#OR one dictionary with type as key, idList as value?
 listTest = []
+typeIdDict = {} 
 for w in wlist:
     listTest.append(w)
+
+typeIdDict = { i: 0 for i in listTest }
     
 prog()
 
