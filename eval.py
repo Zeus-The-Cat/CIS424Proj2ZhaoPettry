@@ -4,6 +4,7 @@
 #Dakotah Pettry
 
 #imported to allow for terminal input through sys.argv[1]
+
 import sys
 
 #lexan uses mitr to iterate the parsed input file until there is nothing left
@@ -18,9 +19,9 @@ def match(ch):
     global lookahead
     if ch == lookahead:
         lookahead = lexan() #matches, gives next lexeme/token
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 #Checks if ID via lookahead is in dict already or if it's a forbidden NAME
 #if not places the ID In dict with value of NONE
@@ -32,17 +33,17 @@ def newID():
         #ID already in dict
         print("Syntax Error: ID ALREADY IN DICT")
         exit(1)
-        return 0
+        return False
     elif lookahead in badNames:
         #Forbidden Name
         print("Syntax Error: FORBIDDEN ID NAME")
         exit(1)
-        return 0
+        return False
     else:
         #Success
         dict[lookahead] = None
         #print(dict)
-        return 1
+        return True
 
 #checks if string is real number
 def is_real(tempString):
@@ -64,15 +65,16 @@ def is_int(tempString):
 def prog():
     global lookahead
     #decl_list only changes lookahead if int or real
-    decl_list()
-    #stmt_list
-    stmt_list()
+    while (lookahead != ""):
+        # print(lookahead)
+        decl_list()
+        #stmt_list
+        stmt_list()
 
 #decl-list#-----------------------------
 def decl_list():
     global lookahead
     #do while loop
-    decl()
     while((lookahead == "int") or (lookahead == "real")):
         decl()
 
@@ -90,21 +92,19 @@ def type():
     if lookahead in typeList:
         #print("FOUND int/real")
         lookahead = lexan()
-    else:
-        print("Syntax Error: not int or real")
-        exit(1)
+
 
 def id_list():
     global lookahead
     #***check that id hasn't been declared yet in dictionary (type and id_list as key and value?)***
     #***if not add to dictionary else Syntax error exit********
+    # print(lookahead)
     if newID():
        #worked
        lookahead = lexan()
     else:
-       print("Syntax Errors")
+       print("Syntax Errors 1")
        exit(1)
-
     if match(","):
         #print("FOUND ,")
         id_list()
@@ -115,7 +115,6 @@ def stmt_list():
     global lookahead
     global dict
     #do while input equals (a declared id, printi, printr)
-    stmt()
     while((lookahead in dict.keys()) or (lookahead == "printi") or (lookahead == "printr")):
         #print(dict)
         stmt()
@@ -161,7 +160,8 @@ def stmt():
         else:
             finalPrint.append(float(temp2))
     else:
-        print("Syntax Errors")
+        # print(lookahead)
+        print("Syntax Errors 2")
         exit(1)
 
 def expr(): #using variable v, from example in notes
@@ -176,7 +176,7 @@ def expr(): #using variable v, from example in notes
             #print("FOUND -")
             v -= term()
         else:
-            print("Syntax Errors")
+            print("Syntax Errors 3")
             exit(1)
     return v
 
@@ -261,6 +261,7 @@ def cond():
 def oprnd():
     global lookahead
     global dict
+    #TO DO -------------------------------------------------
     if(lookahead in dict.keys()):
         temp = dict[lookahead]
         lookahead = lexan()
